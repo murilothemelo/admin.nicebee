@@ -21,9 +21,19 @@ class Database {
                 [
                     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                    PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"
+                    PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4",
+                    PDO::ATTR_EMULATE_PREPARES => false
                 ]
             );
+            
+            // Definir variáveis de sessão para triggers de auditoria
+            if (isset($_SESSION['user']['id'])) {
+                $this->conn->exec("SET @current_user_id = " . (int)$_SESSION['user']['id']);
+            }
+            if (isset($_SERVER['REMOTE_ADDR'])) {
+                $this->conn->exec("SET @current_user_ip = '" . $_SERVER['REMOTE_ADDR'] . "'");
+            }
+            
         } catch(PDOException $exception) {
             error_log("Database connection error: " . $exception->getMessage());
             die("Erro de conexão com o banco de dados");
